@@ -29,8 +29,6 @@ func (userService *UserService) SignIn(ctx *gin.Context, dbPool *pgxpool.Pool) {
 		return
 	}
 	passHash, passErr := userService.hasher.Hash(user.Password)
-	log.Println(passHash)
-	log.Println(dbUser.Password)
 	if passErr != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"response: ": "Internal server error"})
 		return

@@ -31,9 +31,10 @@ func NewTokenInfo(accessTokenTTL time.Duration, refreshTokenTTL time.Duration, s
 }
 
 func (token *TokenInfo) NewAccessToken(tokenTemp string) (signedAccessToken string, err error) {
+
 	newAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(token.accessTokenTTL).Unix(),
-		Subject:   tokenTemp,
+		Issuer:    tokenTemp,
 	})
 	signedAccessToken, err = newAccessToken.SignedString([]byte(token.signingKey))
 	if err != nil {

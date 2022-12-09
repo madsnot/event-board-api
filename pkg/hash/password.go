@@ -1,7 +1,9 @@
 package hash
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	//	"golang.org/x/crypto/bcrypt"
+	"crypto/sha1"
+	"fmt"
 )
 
 type PasswordHasher interface {
@@ -17,9 +19,10 @@ func NewHasher(addition string) *Hasher {
 }
 
 func (hasher *Hasher) Hash(password string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
+	hash := sha1.New()
+	_, err := hash.Write([]byte(password))
 	if err != nil {
 		return "", err
 	}
-	return string(hash) + hasher.addition, nil
+	return fmt.Sprintf("%x", hash.Sum([]byte(hasher.addition))), nil
 }
