@@ -2,6 +2,7 @@ package tokens
 
 import (
 	"crypto/rand"
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -49,6 +50,6 @@ func (token *TokenInfo) NewRefreshToken() (refreshToken string, err error) {
 	if err != nil {
 		return "", err
 	}
-	refreshToken = string(newRefreshToken)
+	refreshToken = fmt.Sprintf("%x", newRefreshToken)
 	return refreshToken, nil
 }

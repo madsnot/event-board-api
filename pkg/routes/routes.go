@@ -31,7 +31,7 @@ func RegisterRoutes(routes *gin.Engine, dataBasePool *pgxpool.Pool, service *use
 	route := routes.Group("/user")
 	//	route.GET("/", users.GetUserPage)
 	route.POST("/signIn", handler.validPool(service.SignIn))
-	//	route.POST("/create", handler.CreateUser)
+	route.POST("/signUp", handler.validPool(service.SignUp))
 
 	// //Events
 	// route = routes.Group("/events")

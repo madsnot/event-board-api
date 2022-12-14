@@ -1,11 +1,10 @@
 package users
 
 import (
+	"example/event-board/pkg/common/db"
 	"example/event-board/pkg/tokens"
 	"fmt"
-	"log"
 
-	//sq "github.com/Masterminds/squirrel"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -23,12 +22,9 @@ func (userService *UserService) createSession(ctx *gin.Context, userId int,
 	if err != nil {
 		return &token, err
 	}
-	sqlQuery := fmt.Sprintf("INSERT INTO users_sessions (user_id,refresh_token) VALUES (%d,'%x')", userId, token.RefreshToken)
-	//sqlQuery, _, _ := sq.Insert("users_sessions").Columns("user_id", "refresh_token").Values(userId, token.RefreshToken).ToSql()
-	_, errQuery := dbPool.Query(ctx, sqlQuery)
-	if errQuery != nil {
-		log.Print("errQuery: ")
-		return &token, errQuery
+	err = db.CreateSession(ctx, dbPool, userId, token.RefreshToken)
+	if err != nil {
+		return &token, err
 	}
 	return &token, nil
 }
