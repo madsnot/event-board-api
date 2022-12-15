@@ -10,11 +10,11 @@ type PasswordHasher interface {
 }
 
 type Hasher struct {
-	addition string
+	salt string
 }
 
-func NewHasher(addition string) *Hasher {
-	return &Hasher{addition: addition}
+func NewHasher(salt string) *Hasher {
+	return &Hasher{salt: salt}
 }
 
 func (hasher *Hasher) Hash(password string) (string, error) {
@@ -23,5 +23,5 @@ func (hasher *Hasher) Hash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%x", hash.Sum([]byte(hasher.addition))), nil
+	return fmt.Sprintf("%x", hash.Sum([]byte(hasher.salt))), nil
 }

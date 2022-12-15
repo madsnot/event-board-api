@@ -18,7 +18,7 @@ import (
 type Server struct {
 	dbPort          string
 	dbUrl           string
-	hashAddition    string
+	hashSalt        string
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 	tokenSigningKey string
@@ -38,7 +38,7 @@ func InitServer() *Server {
 	return &Server{
 		dbPort:          viper.Get("PORT").(string),
 		dbUrl:           viper.Get("DB_URL").(string),
-		hashAddition:    viper.Get("HASH_ADDITION").(string),
+		hashSalt:        viper.Get("HASH_SALT").(string),
 		accessTokenTTL:  time.Hour * time.Duration(accessTokenTTL),
 		refreshTokenTTL: time.Hour * time.Duration(refreshTokenTTL),
 		tokenSigningKey: viper.Get("SIGNING_KEY").(string),
@@ -56,7 +56,7 @@ func (server *Server) Run() {
 		log.Fatal(errDBInit)
 	}
 	defer dbPool.Close()
-	hasher := hash.NewHasher(server.hashAddition)
+	hasher := hash.NewHasher(server.hashSalt)
 	token := tokens.NewTokenInfo(server.accessTokenTTL, server.refreshTokenTTL, server.tokenSigningKey)
 	emailService := email.NewEmailService(server.emailAddr, server.emailPass, server.emailHost, server.emailPort)
 	userService := users.NewUserService(hasher, token, emailService)

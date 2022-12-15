@@ -7,9 +7,9 @@ import (
 )
 
 type DBConfig struct {
-	Port         string `mapstructure:"PORT"`
-	DBURL        string `mapstructure:"DB_URL"`
-	HashAddition string `mapstructure:"HASH_ADDITION"`
+	Port     string `mapstructure:"PORT"`
+	DBURL    string `mapstructure:"DB_URL"`
+	HashSalt string `mapstructure:"HASH_SALT"`
 }
 
 type TokenConfig struct {
