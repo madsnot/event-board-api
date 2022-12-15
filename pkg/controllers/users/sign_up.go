@@ -19,6 +19,7 @@ func (userService *UserService) SignUp(ctx *gin.Context, dbPool *pgxpool.Pool) {
 	if errBindJSON != nil {
 		log.Print("errBindJSON: ", errBindJSON)
 		ctx.JSON(http.StatusInternalServerError, errBindJSON)
+		return
 	}
 	passHash, passErr := userService.hasher.Hash(user.Password)
 	if passErr != nil {
@@ -35,4 +36,10 @@ func (userService *UserService) SignUp(ctx *gin.Context, dbPool *pgxpool.Pool) {
 	user.Password = passHash
 	db.CreateUser(ctx, dbPool, &user)
 	db.CreateStudent(ctx, dbPool, &user.StudentInfo)
+	userService.email.Recipient = user.Email
+	status := userService.email.Verify(ctx)
+	if !status {
+		ctx.JSON(http.StatusBadRequest, gin.H{"response: ": "Мalidation code is incorrect"})
+		return
+	}
 }

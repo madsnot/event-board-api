@@ -6,13 +6,29 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
-	Port            string        `mapstructure:"PORT"`
-	DBURL           string        `mapstructure:"DB_URL"`
-	HashAddition    string        `mapstructure:"HASH_ADDITION"`
+type DBConfig struct {
+	Port         string `mapstructure:"PORT"`
+	DBURL        string `mapstructure:"DB_URL"`
+	HashAddition string `mapstructure:"HASH_ADDITION"`
+}
+
+type TokenConfig struct {
 	AccessTokenTTL  time.Duration `mapstructure:"ACCESS_TOKEN_TTL"`
 	RefreshTokenTTL time.Duration `mapstructure:"REFRESH_TOKEN_TTL"`
 	SigningKey      string        `mapstructure:"SIGNING_KEY"`
+}
+
+type EmailConfig struct {
+	Address  string `mapstructure:"EMAIL_ADDR"`
+	Password string `mapstructure:"EMAIL_PASS"`
+	Host     string `mapstructure:"EMAIL_HOST"`
+	Port     string `mapstructure:"EMAIL_PORT"`
+}
+
+type Config struct {
+	DataBaseConf DBConfig
+	TokenConf    TokenConfig
+	EmailConf    EmailConfig
 }
 
 func LoadConfig() (conf Config, err error) {
