@@ -1,8 +1,8 @@
 package users
 
 import (
-	"example/event-board/pkg/common/db"
-	"example/event-board/pkg/tokens"
+	"example/event-board/server/pkg/common/db"
+	"example/event-board/server/pkg/tokens"
 	"fmt"
 
 	"github.com/gin-gonic/gin"

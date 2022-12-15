@@ -1,8 +1,8 @@
 package users
 
 import (
-	"example/event-board/pkg/common/db"
-	"example/event-board/pkg/common/models"
+	"example/event-board/server/pkg/common/db"
+	"example/event-board/server/pkg/common/models"
 	"log"
 	"net/http"
 

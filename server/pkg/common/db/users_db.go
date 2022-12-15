@@ -1,7 +1,7 @@
 package db
 
 import (
-	"example/event-board/pkg/common/models"
+	"example/event-board/server/pkg/common/models"
 	"fmt"
 	"log"
 	"net/http"

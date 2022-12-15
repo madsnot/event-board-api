@@ -1,7 +1,6 @@
 package hash
 
 import (
-	//	"golang.org/x/crypto/bcrypt"
 	"crypto/sha1"
 	"fmt"
 )

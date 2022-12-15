@@ -1,9 +1,9 @@
 package users
 
 import (
-	"example/event-board/pkg/email"
-	"example/event-board/pkg/hash"
-	"example/event-board/pkg/tokens"
+	"example/event-board/server/pkg/email"
+	"example/event-board/server/pkg/hash"
+	"example/event-board/server/pkg/tokens"
 )
 
 type UserService struct {
