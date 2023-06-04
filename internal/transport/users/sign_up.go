@@ -1,10 +1,11 @@
 package users
 
 import (
-	"example/event-board/server/pkg/common/db"
-	"example/event-board/server/pkg/common/models"
 	"log"
 	"net/http"
+
+	"github.com/madsnot/event-board-api/internal/domain/models"
+	db "github.com/madsnot/event-board-api/internal/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"

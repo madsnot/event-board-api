@@ -1,15 +1,16 @@
-package server
+package main
 
 import (
-	"example/event-board/server/pkg/common/db"
-	"example/event-board/server/pkg/controllers/users"
-	"example/event-board/server/pkg/email"
-	"example/event-board/server/pkg/hash"
-	"example/event-board/server/pkg/routes"
-	"example/event-board/server/pkg/tokens"
 	"log"
 	"strconv"
 	"time"
+
+	db "github.com/madsnot/event-board-api/internal/repository"
+	"github.com/madsnot/event-board-api/internal/routes"
+	"github.com/madsnot/event-board-api/internal/transport/users"
+	"github.com/madsnot/event-board-api/pkg/email"
+	"github.com/madsnot/event-board-api/pkg/hash"
+	"github.com/madsnot/event-board-api/pkg/tokens"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"

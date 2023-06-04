@@ -1,10 +1,11 @@
 package db
 
 import (
-	"example/event-board/server/pkg/common/models"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/madsnot/event-board-api/internal/domain/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"

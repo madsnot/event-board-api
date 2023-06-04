@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"example/event-board/server/pkg/controllers/users"
+	"github.com/madsnot/event-board-api/internal/transport/users"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx"
