@@ -3,6 +3,8 @@ package hash
 import (
 	"crypto/sha1"
 	"fmt"
+
+	"github.com/madsnot/event-board-api/internal/config"
 )
 
 type PasswordHasher interface {
@@ -13,8 +15,8 @@ type Hasher struct {
 	salt string
 }
 
-func NewHasher(salt string) *Hasher {
-	return &Hasher{salt: salt}
+func NewHasher(cfg config.HashConfig) *Hasher {
+	return &Hasher{salt: cfg.HashSalt}
 }
 
 func (hasher *Hasher) Hash(password string) (string, error) {

@@ -1,4 +1,4 @@
-package users
+package usecase
 
 import (
 	"github.com/madsnot/event-board-api/pkg/email"
@@ -6,14 +6,14 @@ import (
 	"github.com/madsnot/event-board-api/pkg/tokens"
 )
 
-type UserService struct {
+type UserUsecase struct {
 	hasher    *hash.Hasher
-	tokenInfo *tokens.TokenInfo
+	tokenInfo *tokens.Tokenizer
 	email     *email.Email
 }
 
-func NewUserService(hasher *hash.Hasher, tokenInfo *tokens.TokenInfo, email *email.Email) *UserService {
-	return &UserService{
+func NewUserUsecase(hasher *hash.Hasher, tokenInfo *tokens.Tokenizer, email *email.Email) *UserUsecase {
+	return &UserUsecase{
 		hasher:    hasher,
 		tokenInfo: tokenInfo,
 		email:     email,

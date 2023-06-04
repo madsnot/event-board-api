@@ -7,8 +7,11 @@ import (
 )
 
 type DBConfig struct {
-	Port     string `mapstructure:"PORT"`
-	DBURL    string `mapstructure:"DB_URL"`
+	Port  string `mapstructure:"PORT"`
+	DBUrl string `mapstructure:"DB_URL"`
+}
+
+type HashConfig struct {
 	HashSalt string `mapstructure:"HASH_SALT"`
 }
 
@@ -26,9 +29,10 @@ type EmailConfig struct {
 }
 
 type Config struct {
-	DataBaseConf DBConfig
-	TokenConf    TokenConfig
-	EmailConf    EmailConfig
+	DataBaseCfg DBConfig
+	TokenCfg    TokenConfig
+	EmailCfg    EmailConfig
+	HashCfg     HashConfig
 }
 
 func LoadConfig() (conf Config, err error) {

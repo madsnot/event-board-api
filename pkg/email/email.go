@@ -8,6 +8,7 @@ import (
 	"net/smtp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/madsnot/event-board-api/internal/config"
 )
 
 type Email struct {
@@ -18,12 +19,12 @@ type Email struct {
 	Recipient string
 }
 
-func NewEmailService(addr string, pass string, host string, port string) *Email {
+func NewEmailService(cfg config.EmailConfig) *Email {
 	return &Email{
-		Address:   addr,
-		Password:  pass,
-		Host:      host,
-		Port:      port,
+		Address:   cfg.Address,
+		Password:  cfg.Password,
+		Host:      cfg.Host,
+		Port:      cfg.Port,
 		Recipient: "",
 	}
 }

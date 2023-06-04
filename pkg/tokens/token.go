@@ -6,32 +6,24 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/madsnot/event-board-api/internal/config"
 )
 
-type TokenManager interface {
-	CreateToken(userId string) (*Token, error)
-}
-
-type Token struct {
-	AccessToken  string
-	RefreshToken string
-}
-
-type TokenInfo struct {
+type Tokenizer struct {
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 	signingKey      string
 }
 
-func NewTokenInfo(accessTokenTTL time.Duration, refreshTokenTTL time.Duration, signingKey string) *TokenInfo {
-	return &TokenInfo{
-		accessTokenTTL:  accessTokenTTL,
-		refreshTokenTTL: refreshTokenTTL,
-		signingKey:      signingKey,
+func NewTokenizer(cfg config.TokenConfig) *Tokenizer {
+	return &Tokenizer{
+		accessTokenTTL:  cfg.AccessTokenTTL,
+		refreshTokenTTL: cfg.RefreshTokenTTL,
+		signingKey:      cfg.SigningKey,
 	}
 }
 
-func (token *TokenInfo) NewAccessToken(tokenTemp string) (signedAccessToken string, err error) {
+func (token *Tokenizer) NewAccessToken(tokenTemp string) (signedAccessToken string, err error) {
 
 	newAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(token.accessTokenTTL).Unix(),
@@ -44,7 +36,7 @@ func (token *TokenInfo) NewAccessToken(tokenTemp string) (signedAccessToken stri
 	return signedAccessToken, nil
 }
 
-func (token *TokenInfo) NewRefreshToken() (refreshToken string, err error) {
+func (token *Tokenizer) NewRefreshToken() (refreshToken string, err error) {
 	newRefreshToken := make([]byte, 15)
 	_, err = rand.Read(newRefreshToken)
 	if err != nil {
