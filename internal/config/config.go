@@ -6,9 +6,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Config struct {
+	DataBaseCfg DBConfig
+	TokenCfg    TokenConfig
+	EmailCfg    EmailConfig
+	HashCfg     HashConfig
+}
+
 type DBConfig struct {
-	Port string `mapstructure:"PORT"`
-	DSN  string `mapstructure:"DB_URL"`
+	DSN string `mapstructure:"DB_URL"`
 }
 
 type HashConfig struct {
@@ -28,27 +34,20 @@ type EmailConfig struct {
 	Port     string `mapstructure:"EMAIL_PORT"`
 }
 
-type Config struct {
-	DataBaseCfg DBConfig
-	TokenCfg    TokenConfig
-	EmailCfg    EmailConfig
-	HashCfg     HashConfig
-}
-
-func LoadConfig() (conf Config, err error) {
-	viper.AddConfigPath("./pkg/common/envs")
-	viper.SetConfigName("dev")
-	viper.SetConfigType("env")
+func LoadConfig() (Config, error) {
+	var cfg Config
 
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
-
+	err := viper.ReadInConfig()
 	if err != nil {
-		return
+		return Config{}, err
 	}
 
-	err = viper.Unmarshal(&conf)
+	err = viper.Unmarshal(&cfg)
+	if err != nil {
+		return Config{}, err
+	}
 
-	return
+	return cfg, nil
 }
