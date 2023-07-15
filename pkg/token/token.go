@@ -1,4 +1,4 @@
-package tokens
+package token
 
 import (
 	"crypto/rand"
@@ -24,24 +24,26 @@ func NewTokenizer(cfg config.TokenConfig) *Tokenizer {
 }
 
 func (token *Tokenizer) NewAccessToken(tokenTemp string) (signedAccessToken string, err error) {
-
 	newAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(token.accessTokenTTL).Unix(),
 		Issuer:    tokenTemp,
 	})
+
 	signedAccessToken, err = newAccessToken.SignedString([]byte(token.signingKey))
 	if err != nil {
 		return "", err
 	}
+
 	return signedAccessToken, nil
 }
 
 func (token *Tokenizer) NewRefreshToken() (refreshToken string, err error) {
 	newRefreshToken := make([]byte, 15)
+
 	_, err = rand.Read(newRefreshToken)
 	if err != nil {
 		return "", err
 	}
-	refreshToken = fmt.Sprintf("%x", newRefreshToken)
-	return refreshToken, nil
+
+	return fmt.Sprintf("%x", newRefreshToken), nil
 }

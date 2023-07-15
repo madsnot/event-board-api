@@ -1,79 +1,63 @@
 package main
 
 import (
-	"log"
-
+	"context"
 	"github.com/madsnot/event-board-api/internal/config"
-	db "github.com/madsnot/event-board-api/internal/repository"
-	"github.com/madsnot/event-board-api/internal/routes"
-	"github.com/madsnot/event-board-api/internal/transport/users"
-	"github.com/madsnot/event-board-api/pkg/email"
+	"github.com/madsnot/event-board-api/pkg/database"
 	"github.com/madsnot/event-board-api/pkg/hash"
-	"github.com/madsnot/event-board-api/pkg/tokens"
-
-	"github.com/gin-gonic/gin"
+	"github.com/madsnot/event-board-api/pkg/token"
+	"golang.org/x/sync/errgroup"
 )
 
-// type Server struct {
-// 	config.DBConfig
-// 	config.
-// 	dbPort          string
-// 	dbUrl           string
-// 	hashSalt        string
-// 	accessTokenTTL  time.Duration
-// 	refreshTokenTTL time.Duration
-// 	tokenSigningKey string
-// 	emailAddr       string
-// 	emailPass       string
-// 	emailHost       string
-// 	emailPort       string
-// }
+type Server struct {
+	cfg       config.Config
+	db        database.DBInterface
+	tokenizer *token.Tokenizer
+	hasher    *hash.Hasher
+}
 
-// func InitServer() *Server {
-// 	viper.SetConfigFile("./server/pkg/common/envs/.env")
-// 	viper.ReadInConfig()
-// 	ttl := viper.Get("ACCESS_TOKEN_TTL").(string)
-// 	accessTokenTTL, _ := strconv.Atoi(ttl)
-// 	ttl = viper.Get("REFRESH_TOKEN_TTL").(string)
-// 	refreshTokenTTL, _ := strconv.Atoi(ttl)
-// 	return &Server{
-// 		dbPort:          viper.Get("PORT").(string),
-// 		dbUrl:           viper.Get("DB_URL").(string),
-// 		hashSalt:        viper.Get("HASH_SALT").(string),
-// 		accessTokenTTL:  time.Hour * time.Duration(accessTokenTTL),
-// 		refreshTokenTTL: time.Hour * time.Duration(refreshTokenTTL),
-// 		tokenSigningKey: viper.Get("SIGNING_KEY").(string),
-// 		emailAddr:       viper.Get("EMAIL_ADDR").(string),
-// 		emailPass:       viper.Get("EMAIL_PASS").(string),
-// 		emailHost:       viper.Get("EMAIL_HOST").(string),
-// 		emailPort:       viper.Get("EMAIL_PORT").(string),
-// 	}
-// }
-
-func Run() {
-	route := gin.Default()
-
+func NewServer() *Server {
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatal(err)
+		return &Server{}
 	}
 
-	dbPool, errDBInit := db.Init(cfg.DataBaseCfg.DBUrl)
-	if errDBInit != nil {
-		log.Fatal(errDBInit)
-	}
+	db := database.NewDB(cfg.DataBaseCfg.DSN)
 
-	defer dbPool.Close()
+	tokenizer := token.NewTokenizer(cfg.TokenCfg)
 
 	hasher := hash.NewHasher(cfg.HashCfg)
 
-	tokenizer := tokens.NewTokenizer(cfg.TokenCfg)
+	return &Server{
+		cfg:       cfg,
+		db:        db,
+		tokenizer: tokenizer,
+		hasher:    hasher,
+	}
+}
 
-	emailService := email.NewEmailService(cfg.EmailCfg)
+func (srv Server) Run(ctx context.Context) error {
+	if srv.db != nil {
+		if err := srv.db.Open(ctx); err != nil {
+			return err
+		}
+	}
 
-	userService := users.NewUserService(hasher, tokenizer, emailService)
+	srv.initServices(ctx)
 
-	routes.RegisterRoutes(route, dbPool, userService)
+	g := new(errgroup.Group)
 
-	route.Run(cfg.DataBaseCfg.Port)
+	//g.Go(func() error {
+	//	return srv.grpcServer.Start()
+	//})
+
+	return g.Wait()
+}
+
+func (srv Server) Close(ctx context.Context) {
+	_ = srv.db.Close()
+}
+
+func (srv Server) initServices(ctx context.Context) {
+
 }

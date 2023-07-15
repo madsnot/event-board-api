@@ -7,8 +7,8 @@ import (
 )
 
 type DBConfig struct {
-	Port  string `mapstructure:"PORT"`
-	DBUrl string `mapstructure:"DB_URL"`
+	Port string `mapstructure:"PORT"`
+	DSN  string `mapstructure:"DB_URL"`
 }
 
 type HashConfig struct {
