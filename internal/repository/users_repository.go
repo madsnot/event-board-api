@@ -2,27 +2,42 @@ package repository
 
 import (
 	"context"
+	"github.com/gofrs/uuid"
+	"github.com/madsnot/event-board-api/internal/domain/models"
 	"github.com/madsnot/event-board-api/internal/repository/dto"
 	"github.com/madsnot/event-board-api/pkg/database"
-	"golang.org/x/exp/slog"
+	"github.com/rs/zerolog"
 )
 
 type UserRepository struct {
-	db  database.DBInterface
-	log slog.Logger
+	db  database.ISqlDb
+	log zerolog.Logger
 }
 
-func NewUserRepository(db database.DBInterface, log slog.Logger) UserRepository {
+func NewUserRepository(db database.ISqlDb, log zerolog.Logger) UserRepository {
 	return UserRepository{
 		db:  db,
 		log: log,
 	}
 }
 
-func (ur UserRepository) CreateUser(ctx context.Context, user dto.UserDTO) error {
-	return nil
+func (ur UserRepository) CreateUser(ctx context.Context, user models.User) (uuid.UUID, error) {
+	return uuid.Nil, nil
 }
 
-func (ur UserRepository) GetUserByEmail(ctx context.Context, email string) (user dto.UserDTO, err error) {
-	return dto.UserDTO{}, err
+func (ur UserRepository) GetUserByEmail(ctx context.Context, email string) (user models.User, err error) {
+	var userDTO dto.UserDatabaseDTO
+
+	tx, err := ur.db.BeginTx(ctx)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	row := tx.QueryRow(ctx, `SELECT * FROM users WHERE email = $1`, email)
+
+	if err = row.Scan(&userDTO); err != nil {
+
+	}
+
+	return adaptUserDTOToBmodel(userDTO), err
 }

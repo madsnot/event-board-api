@@ -23,18 +23,15 @@ func main() {
 
 	srv := NewServer()
 
-	errChan := make(chan error, 1)
-	errChan <- srv.Run(ctx)
-
-	select {
-	case <-ctx.Done():
-		fmt.Fprintln(os.Stderr, "context done")
-
-		srv.Close(ctx)
-	case err := <-errChan:
+	if err := srv.Run(ctx); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 
-		srv.Close(ctx)
+		srv.Close()
 		os.Exit(1)
 	}
+
+	<-ctx.Done()
+
+	fmt.Fprintln(os.Stderr, "context done")
+	srv.Close()
 }

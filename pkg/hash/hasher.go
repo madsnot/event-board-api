@@ -2,7 +2,6 @@ package hash
 
 import (
 	"crypto/sha1"
-	"fmt"
 
 	"github.com/madsnot/event-board-api/internal/config"
 )
@@ -17,9 +16,11 @@ func NewHasher(cfg config.HashConfig) *Hasher {
 
 func (hasher *Hasher) Hash(str string) (string, error) {
 	hash := sha1.New()
+
 	_, err := hash.Write([]byte(str))
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%x", hash.Sum([]byte(hasher.salt))), nil
+
+	return string(hash.Sum([]byte(hasher.salt))), nil
 }

@@ -2,22 +2,25 @@ package repository
 
 import (
 	"context"
+	"github.com/madsnot/event-board-api/internal/domain/models"
 	"github.com/madsnot/event-board-api/pkg/database"
-	"golang.org/x/exp/slog"
+	"github.com/rs/zerolog"
 )
 
 type SessionRepository struct {
-	db  database.DBInterface
-	log slog.Logger
+	db  database.INoSqlDb
+	log zerolog.Logger
 }
 
-func NewSessionRepository(db database.DBInterface, log slog.Logger) *SessionRepository {
+func NewSessionRepository(db database.INoSqlDb, log zerolog.Logger) *SessionRepository {
 	return &SessionRepository{
 		db:  db,
 		log: log,
 	}
 }
 
-func (sr SessionRepository) CreateSession(ctx context.Context, userId int, refreshToken string) error {
-	return nil
+func (sr SessionRepository) CreateSession(ctx context.Context, session models.Session) (models.Session, error) {
+	//dto := adaptBmodelToDTO(session)
+
+	return models.Session{}, nil
 }

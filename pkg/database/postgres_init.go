@@ -13,7 +13,7 @@ type DB struct {
 	dsn  string
 }
 
-func NewDB(dsn string) *DB {
+func NewSqlDbClient(dsn string) *DB {
 	return &DB{
 		dsn: dsn,
 	}

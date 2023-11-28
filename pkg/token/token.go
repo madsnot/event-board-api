@@ -23,11 +23,8 @@ func NewTokenizer(cfg config.TokenConfig) *Tokenizer {
 	}
 }
 
-func (token *Tokenizer) NewAccessToken(tokenTemp string) (signedAccessToken string, err error) {
-	newAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(token.accessTokenTTL).Unix(),
-		Issuer:    tokenTemp,
-	})
+func (token *Tokenizer) NewAccessToken(claims jwt.Claims) (signedAccessToken string, err error) {
+	newAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	signedAccessToken, err = newAccessToken.SignedString([]byte(token.signingKey))
 	if err != nil {

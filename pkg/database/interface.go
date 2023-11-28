@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type DBInterface interface {
+type ISqlDb interface {
 	Open(context.Context) error
 	Close() error
 
@@ -20,4 +20,7 @@ type DBInterface interface {
 
 	BeginTx(context.Context) (pgx.Tx, error)
 	BeginTxOpt(context.Context, pgx.TxOptions) (pgx.Tx, error)
+}
+
+type INoSqlDb interface {
 }
