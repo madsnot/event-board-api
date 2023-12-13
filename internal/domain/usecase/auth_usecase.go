@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/madsnot/event-board-api/internal/domain/models"
-	repo "github.com/madsnot/event-board-api/internal/repository"
+	repo "github.com/madsnot/event-board-api/internal/repository/postgres"
 	"github.com/madsnot/event-board-api/pkg/hash"
 	"github.com/madsnot/event-board-api/pkg/token"
 )

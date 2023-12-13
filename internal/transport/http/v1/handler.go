@@ -29,8 +29,8 @@ func (h *handler) Register(router *mux.Router) {
 	router.HandleFunc("/auth/logout", h.Logout).Methods(http.MethodGet)
 
 	router.HandleFunc("/api/events", h.GetEventList).Methods(http.MethodGet)
+	router.HandleFunc("/api/events/create", h.CreateEvent).Methods(http.MethodPost)
 	router.HandleFunc("/api/events/id", h.GetEvent).Methods(http.MethodGet)
-	router.HandleFunc("/api/events/id/create", h.CreateEvent).Methods(http.MethodPost)
 	router.HandleFunc("/api/events/id/update", h.UpdateEvent).Methods(http.MethodPost)
 	router.HandleFunc("/api/events/id/close", h.CloseEvent).Methods(http.MethodGet)
 }

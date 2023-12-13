@@ -2,21 +2,23 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"github.com/gorilla/mux"
+	"github.com/madsnot/event-board-api/internal/config"
+	"github.com/madsnot/event-board-api/internal/domain/usecase"
+	osRep "github.com/madsnot/event-board-api/internal/repository/opensearch"
+	"github.com/madsnot/event-board-api/internal/repository/postgres"
 	httpServer "github.com/madsnot/event-board-api/internal/transport/http/v1"
+	"github.com/madsnot/event-board-api/pkg/database"
+	"github.com/madsnot/event-board-api/pkg/hash"
+	"github.com/madsnot/event-board-api/pkg/token"
 	"github.com/madsnot/event-board-api/tern"
+	"github.com/opensearch-project/opensearch-go/v2"
 	"github.com/rs/zerolog"
 	"net"
 	"net/http"
 	"os"
-
-	"github.com/madsnot/event-board-api/internal/config"
-	"github.com/madsnot/event-board-api/internal/domain/usecase"
-	"github.com/madsnot/event-board-api/internal/repository"
-	"github.com/madsnot/event-board-api/pkg/database"
-	"github.com/madsnot/event-board-api/pkg/hash"
-	"github.com/madsnot/event-board-api/pkg/token"
 )
 
 type Server struct {
@@ -88,10 +90,14 @@ func (srv *Server) Run(ctx context.Context) error {
 		return err
 	}
 
-	srv.initRouters()
+	err = srv.initRouters()
+	if err != nil {
+		srv.logger.Error().Err(err).Msg("failed init routers")
+		return err
+	}
 
 	go func() {
-		srv.logger.Info().Msg("starting http server on :8080")
+		srv.logger.Info().Msg("starting http server on :8082")
 
 		err = srv.httpSrv.Serve(srv.listener)
 		if err != nil {
@@ -123,17 +129,34 @@ func (srv *Server) Close() {
 	}
 }
 
-func (srv *Server) initRouters() {
-	sessionRep := repository.NewSessionRepository(srv.db, srv.logger)
-	userRep := repository.NewUserRepository(srv.db, srv.logger)
-	eventRep := repository.NewEventRepository(srv.db, srv.logger)
+func (srv *Server) initRouters() error {
+	client, err := opensearch.NewClient(opensearch.Config{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Addresses: []string{
+			srv.cfg.OpensearchConfig.Host,
+		},
+		Username: srv.cfg.OpensearchConfig.Username,
+		Password: srv.cfg.OpensearchConfig.Password,
+	})
+	if err != nil {
+		return err
+	}
+
+	sessionRep := postgres.NewSessionRepository(srv.db, srv.logger)
+	userRep := postgres.NewUserRepository(srv.db, srv.logger)
+	eventRep := postgres.NewEventRepository(srv.db, srv.logger)
+	osClient := osRep.NewOpensearchClient(srv.cfg.OpensearchConfig, client)
 
 	authUC := usecase.NewAuthUsecase(srv.hasher, srv.tokenizer, userRep, sessionRep)
 	userUC := usecase.NewUserUsecase(userRep)
-	eventUC := usecase.NewEventUsecase(eventRep)
+	eventUC := usecase.NewEventUsecase(eventRep, osClient)
 
 	uc := usecase.NewUsecase(authUC, userUC, eventUC)
 
 	handler := httpServer.NewHandler(uc, srv.cfg)
 	handler.Register(srv.router)
+
+	return nil
 }

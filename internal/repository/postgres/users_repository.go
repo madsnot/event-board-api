@@ -1,10 +1,11 @@
-package repository
+package postgres
 
 import (
 	"context"
 	"github.com/gofrs/uuid"
 	"github.com/madsnot/event-board-api/internal/domain/models"
-	"github.com/madsnot/event-board-api/internal/repository/dto"
+	"github.com/madsnot/event-board-api/internal/repository"
+	"github.com/madsnot/event-board-api/internal/repository/postgres/dto"
 	"github.com/madsnot/event-board-api/pkg/database"
 	"github.com/rs/zerolog"
 )
@@ -39,5 +40,5 @@ func (ur UserRepository) GetUserByEmail(ctx context.Context, email string) (user
 
 	}
 
-	return adaptUserDTOToBmodel(userDTO), err
+	return repository.adaptUserDTOToBmodel(userDTO), err
 }

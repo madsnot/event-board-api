@@ -11,17 +11,20 @@ type (
 		Man   bool
 		Woman bool
 	}
-	EventStatus string
+	EventStatus int
 )
 
 const (
-	EventTypeOnline = iota
+	EventTypeEmpty EventType = iota
+	EventTypeOnline
 	EventTypeOffline
 )
 
 const (
-	EventStatusActive EventStatus = "active"
-	EventStatusClosed EventStatus = "closed"
+	EventStatusEmpty EventStatus = iota
+	EventStatusNew
+	EventStatusActive
+	EventStatusClosed
 )
 
 type Event struct {

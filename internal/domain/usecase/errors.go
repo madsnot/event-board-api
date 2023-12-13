@@ -47,5 +47,7 @@ func (be BusinessError) Wrap(err error) error {
 }
 
 var (
-	ErrUserNotFound = newBusinessError(1000, "user not found")
+	ErrUserNotFound     = newBusinessError(1000, "user not found")
+	ErrInvalidEvent     = newBusinessError(1001, "invalid event")
+	ErrInvalidStartDate = newBusinessError(1002, "invalid start date")
 )

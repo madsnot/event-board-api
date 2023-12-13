@@ -26,6 +26,10 @@ services:
       - "6379:6379"
     networks:
       - event-board-network
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    ports:
+      - 15672:15672
   opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1

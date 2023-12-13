@@ -3,14 +3,14 @@ package usecase
 import (
 	"context"
 	"github.com/madsnot/event-board-api/internal/domain/models"
-	"github.com/madsnot/event-board-api/internal/repository"
+	"github.com/madsnot/event-board-api/internal/repository/postgres"
 )
 
 type UserUsecase struct {
-	rep repository.UserRepository
+	rep postgres.UserRepository
 }
 
-func NewUserUsecase(rep repository.UserRepository) *UserUsecase {
+func NewUserUsecase(rep postgres.UserRepository) *UserUsecase {
 	return &UserUsecase{
 		rep: rep,
 	}

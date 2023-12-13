@@ -7,14 +7,15 @@ import (
 )
 
 type Config struct {
-	Host          string        `env:"SERVER_HOST"`
-	Port          string        `env:"SERVER_PORT"`
-	ReadTimeout   time.Duration `env:"SERVER_READ_TIMEOUT"`
-	WriteTimeout  time.Duration `env:"SERVER_WRITE_TIMEOUT"`
-	MigrationsCfg MigrationsConfig
-	PostgresCfg   PostgresConfig
-	TokenCfg      TokenConfig
-	HashCfg       HashConfig
+	Host             string        `env:"SERVER_HOST"`
+	Port             string        `env:"SERVER_PORT"`
+	ReadTimeout      time.Duration `env:"SERVER_READ_TIMEOUT"`
+	WriteTimeout     time.Duration `env:"SERVER_WRITE_TIMEOUT"`
+	MigrationsCfg    MigrationsConfig
+	PostgresCfg      PostgresConfig
+	TokenCfg         TokenConfig
+	HashCfg          HashConfig
+	OpensearchConfig OpensearchConfig
 }
 
 type MigrationsConfig struct {
@@ -37,6 +38,13 @@ type TokenConfig struct {
 	AccessTokenTTL  time.Duration `env:"ACCESS_TOKEN_TTL"`
 	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL"`
 	SigningKey      string        `env:"TOKEN_SIGNING_KEY"`
+}
+
+type OpensearchConfig struct {
+	Host     string `env:"OPENSEARCH_HOST"`
+	Username string `env:"OPENSEARCH_USERNAME" envDefault:"admin"`
+	Password string `env:"OPENSEARCH_PASSWORD" envDefault:"admin"`
+	Index    string `env:"OPENSEARCH_INDEX" envDefault:"event-index"`
 }
 
 func LoadConfig() (Config, error) {

@@ -5,16 +5,28 @@ import (
 	"time"
 )
 
-type EventType int
+type (
+	EventType   int
+	EventStatus int
+)
 
 const (
-	EventTypeOnline EventType = iota
+	EventTypeEmpty EventType = iota
+	EventTypeOnline
 	EventTypeOffline
+)
+
+const (
+	EventStatusEmpty EventStatus = iota
+	EventStatusNew
+	EventStatusActive
+	EventStatusClosed
 )
 
 type EventDTO struct {
 	ID          pgtype.UUID
 	AuthorID    pgtype.UUID
+	Status      EventStatus
 	Title       string
 	Type        EventType
 	Theme       string
