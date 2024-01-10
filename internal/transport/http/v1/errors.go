@@ -36,7 +36,7 @@ func (te TransportError) Wrap(err error) error {
 	codesStr := strings.Fields(err.Error())
 
 	codes := make([]int, 1, len(codesStr)+1)
-
+	msgs := make([]string, 1, len(codesStr)+1)
 	codes[0] = te.code
 
 	for _, str := range codesStr {
@@ -44,10 +44,11 @@ func (te TransportError) Wrap(err error) error {
 		codes = append(codes, code)
 	}
 
-	return models.NewWrapError(codes)
+	return models.NewWrapError(codes, msgs)
 }
 
 var (
+	ErrJWTExpired = newTransportError(http.StatusUnauthorized, "jwt expired")
 	ErrBadRequest = newTransportError(http.StatusBadRequest, "bad request")
 	ErrInternal   = newTransportError(http.StatusInternalServerError, "internal error")
 )

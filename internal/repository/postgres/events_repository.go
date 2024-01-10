@@ -120,12 +120,12 @@ func (er EventRepository) GetList(ctx context.Context, filters models.EventFilte
 			&event.CreatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, repository.ErrInternal.Wrap(err)
 		}
 
-		bevent, err := repository.adaptEventDTOToBmodel(event)
+		bevent, err := adaptEventDTOToBmodel(event)
 		if err != nil {
-			return nil, err
+			return nil, repository.ErrInternal.Wrap(err)
 		}
 
 		list = append(list, bevent)
@@ -135,14 +135,14 @@ func (er EventRepository) GetList(ctx context.Context, filters models.EventFilte
 }
 
 func (er EventRepository) CreateEvent(ctx context.Context, event models.Event) (uuid.UUID, error) {
-	dto, err := repository.adaptEventBmodelToDTO(event)
+	dto, err := adaptEventBmodelToDTO(event)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, repository.ErrInternal.Wrap(err)
 	}
 
 	tx, err := er.db.BeginTx(ctx)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, repository.ErrInternal.Wrap(err)
 	}
 	defer tx.Rollback(ctx)
 
@@ -162,8 +162,11 @@ func (er EventRepository) CreateEvent(ctx context.Context, event models.Event) (
 		dto.StartDate,
 		dto.EndDate,
 	).Scan(&id); err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, repository.ErrInternal.Wrap(err)
 	}
 
-	return id.Bytes, tx.Commit(ctx)
+	if err = tx.Commit(ctx); err != nil {
+		return uuid.Nil, repository.ErrInternal.Wrap(err)
+	}
+	return id.Bytes, nil
 }

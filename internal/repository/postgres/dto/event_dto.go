@@ -34,7 +34,7 @@ type EventDTO struct {
 	Genders     pgtype.JSONB
 	Age         int
 	StartDate   time.Time
-	EndDate     pgtype.Time
+	EndDate     *time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	ClosedAt    pgtype.Time

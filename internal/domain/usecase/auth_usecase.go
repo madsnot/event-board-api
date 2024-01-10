@@ -2,11 +2,13 @@ package usecase
 
 import (
 	"context"
+	"github.com/cristalhq/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/madsnot/event-board-api/internal/domain/models"
 	repo "github.com/madsnot/event-board-api/internal/repository/postgres"
 	"github.com/madsnot/event-board-api/pkg/hash"
 	"github.com/madsnot/event-board-api/pkg/token"
+	"time"
 )
 
 type AuthUsecase struct {
@@ -41,9 +43,16 @@ func (ac AuthUsecase) CreateSession(ctx context.Context, userID uuid.UUID) (mode
 		return models.Session{}, err
 	}
 
-	session.AccessToken, err = ac.tokenizer.NewAccessToken(models.Claims{
+	now := time.Now().UTC()
+
+	claims := models.Claims{
 		UserID: session.UserID,
-	})
+	}
+
+	claims.ExpiresAt = jwt.NewNumericDate(now.Add(ac.tokenizer.GetAccessTokenTTL()))
+	claims.IssuedAt = jwt.NewNumericDate(now)
+
+	session.AccessToken, err = ac.tokenizer.NewAccessToken(claims)
 
 	return session, nil
 }

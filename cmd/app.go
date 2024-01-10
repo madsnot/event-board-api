@@ -50,7 +50,10 @@ func NewServer() *Server {
 
 	db := database.NewSqlDbClient(cfg.PostgresCfg.DSN)
 
-	tokenizer := token.NewTokenizer(cfg.TokenCfg)
+	tokenizer, err := token.NewTokenizer(cfg.TokenCfg)
+	if err != nil {
+		return &Server{}
+	}
 
 	hasher := hash.NewHasher(cfg.HashCfg)
 

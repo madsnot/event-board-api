@@ -6,6 +6,7 @@
 
 #db data
 build/data
+build/rabbitmq
 
 # Binaries for programs and plugins
 *.exe

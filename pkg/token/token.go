@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/cristalhq/jwt/v4"
 	"github.com/madsnot/event-board-api/internal/config"
 )
 
@@ -13,28 +13,41 @@ type Tokenizer struct {
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
 	signingKey      string
+	builder         *jwt.Builder
+	verifier        jwt.Verifier
 }
 
-func NewTokenizer(cfg config.TokenConfig) *Tokenizer {
+func NewTokenizer(cfg config.TokenConfig) (*Tokenizer, error) {
+	signer, err := jwt.NewSignerHS(jwt.HS512, []byte(cfg.SigningKey))
+	if err != nil {
+		return nil, err
+	}
+
+	builder := jwt.NewBuilder(signer)
+
 	return &Tokenizer{
 		accessTokenTTL:  cfg.AccessTokenTTL,
 		refreshTokenTTL: cfg.RefreshTokenTTL,
 		signingKey:      cfg.SigningKey,
-	}
+		builder:         builder,
+		verifier:        signer,
+	}, nil
 }
 
-func (token *Tokenizer) NewAccessToken(claims jwt.Claims) (signedAccessToken string, err error) {
-	newAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+func (t *Tokenizer) GetAccessTokenTTL() time.Duration {
+	return t.accessTokenTTL
+}
 
-	signedAccessToken, err = newAccessToken.SignedString([]byte(token.signingKey))
+func (t *Tokenizer) NewAccessToken(claims any) (signedAccessToken string, err error) {
+	newAccessToken, err := t.builder.Build(claims)
 	if err != nil {
 		return "", err
 	}
 
-	return signedAccessToken, nil
+	return newAccessToken.String(), nil
 }
 
-func (token *Tokenizer) NewRefreshToken() (refreshToken string, err error) {
+func (t *Tokenizer) NewRefreshToken() (refreshToken string, err error) {
 	newRefreshToken := make([]byte, 15)
 
 	_, err = rand.Read(newRefreshToken)
@@ -43,4 +56,8 @@ func (token *Tokenizer) NewRefreshToken() (refreshToken string, err error) {
 	}
 
 	return fmt.Sprintf("%x", newRefreshToken), nil
+}
+
+func (t *Tokenizer) UnmarshalJWT(token string, claims any) error {
+	return jwt.ParseClaims([]byte(token), t.verifier, claims)
 }

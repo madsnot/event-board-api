@@ -7,10 +7,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/madsnot/event-board-api/internal/config"
 	"github.com/madsnot/event-board-api/internal/domain/models"
+	"github.com/madsnot/event-board-api/internal/repository"
 	"github.com/opensearch-project/opensearch-go/v2"
 	"github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 	"io"
 	"strings"
+	"time"
 )
 
 type Client struct {
@@ -26,14 +28,22 @@ func NewOpensearchClient(cfg config.OpensearchConfig, client *opensearch.Client)
 }
 
 func (c Client) Index(ctx context.Context, event models.Event) error {
+	var end time.Time
+
+	if event.EndDate != nil {
+		end = *event.EndDate
+	}
+
 	document := IndexDocument{
-		title:       event.Title,
-		description: event.Description,
+		Title:       event.Title,
+		Description: event.Description,
+		StartDate:   event.StartDate,
+		EndDate:     end,
 	}
 
 	body, err := json.Marshal(document)
 	if err != nil {
-		return err
+		return repository.ErrInternal.Wrap(err)
 	}
 
 	req := opensearchapi.IndexRequest{
@@ -44,7 +54,7 @@ func (c Client) Index(ctx context.Context, event models.Event) error {
 
 	_, err = req.Do(ctx, c.client)
 	if err != nil {
-		return err
+		return repository.ErrInternal.Wrap(err)
 	}
 
 	return nil
@@ -72,16 +82,16 @@ func (c Client) Search(ctx context.Context, query string) ([]uuid.UUID, error) {
 
 	searchResponse, err := search.Do(ctx, c.client)
 	if err != nil {
-		return nil, err
+		return nil, repository.ErrInternal.Wrap(err)
 	}
 
 	bytes, err := io.ReadAll(searchResponse.Body)
 	if err != nil {
-		return nil, err
+		return nil, repository.ErrInternal.Wrap(err)
 	}
 
 	if err = json.Unmarshal(bytes, &res); err != nil {
-		return nil, err
+		return nil, repository.ErrInternal.Wrap(err)
 	}
 
 	for _, doc := range res.hits.docs {

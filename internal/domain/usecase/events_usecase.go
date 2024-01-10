@@ -24,12 +24,12 @@ func (eu EventUsecase) GetList(ctx context.Context, filters models.EventFilters)
 
 	filters.EventIDs, err = eu.os.Search(ctx, filters.Query)
 	if err != nil {
-		return nil, nil
+		return nil, ErrDocsNotFound.Wrap(err)
 	}
 
 	list, err := eu.rep.GetList(ctx, filters)
 	if err != nil {
-		return nil, nil
+		return nil, ErrInvalidToGetEvents.Wrap(err)
 	}
 
 	return list, nil
@@ -44,11 +44,11 @@ func (eu EventUsecase) CreateEvent(ctx context.Context, event models.Event) erro
 
 	event.ID, err = eu.rep.CreateEvent(ctx, event)
 	if err != nil {
-		return err
+		return ErrInvalidToCreateEvent.Wrap(err)
 	}
 
 	if err = eu.os.Index(ctx, event); err != nil {
-		return err
+		return ErrInvalidToCreateIndex.Wrap(err)
 	}
 
 	return nil

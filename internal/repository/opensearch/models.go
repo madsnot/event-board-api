@@ -1,10 +1,15 @@
 package opensearch
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type IndexDocument struct {
-	title       string `json:"title"`
-	description string `json:"description"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	StartDate   time.Time `json:"start_date"`
+	EndDate     time.Time `json:"end_date"`
 }
 
 type SearchDocument struct {

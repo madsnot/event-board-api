@@ -29,10 +29,17 @@ func adaptUserDTOToBmodel(user dto2.UserDatabaseDTO) models.User {
 
 	return models.User{
 		ID:           user.ID.Get().(uuid.UUID),
-		Name:         user.Name,
-		Gender:       user.Gender,
-		BirthdayDate: bDate,
+		Username:     user.Username,
 		Email:        user.Email,
+		Password:     user.Password,
+		Avatar:       user.Avatar,
+		Firstname:    user.Firstname,
+		Lastname:     user.Lastname,
+		Middlename:   user.Middlename,
+		Gender:       convertDTOGenderToBmodel(user.Gender),
+		BirthdayDate: bDate,
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	}
 }
 
@@ -45,6 +52,7 @@ func adaptEventBmodelToDTO(event models.Event) (dto2.EventDTO, error) {
 		Description: event.Description,
 		Age:         event.Age,
 		StartDate:   event.StartDate,
+		EndDate:     event.EndDate,
 	}
 
 	if err := eventDTO.AuthorID.Set(event.AuthorID); err != nil {
@@ -55,23 +63,10 @@ func adaptEventBmodelToDTO(event models.Event) (dto2.EventDTO, error) {
 		return dto2.EventDTO{}, err
 	}
 
-	if err := eventDTO.EndDate.Set(event.EndDate); err != nil {
-		return dto2.EventDTO{}, err
-	}
-
 	return eventDTO, nil
 }
 
 func adaptEventDTOToBmodel(edto dto2.EventDTO) (models.Event, error) {
-	var (
-		endPtr *time.Time
-	)
-
-	if edto.EndDate.Status != pgtype.Null {
-		end := edto.EndDate.Get().(time.Time)
-		endPtr = &end
-	}
-
 	genders, err := convertDTOGendersToBmodel(edto.Genders)
 	if err != nil {
 		return models.Event{}, err
@@ -88,7 +83,7 @@ func adaptEventDTOToBmodel(edto dto2.EventDTO) (models.Event, error) {
 		Genders:     genders,
 		Age:         edto.Age,
 		StartDate:   edto.StartDate,
-		EndDate:     endPtr,
+		EndDate:     edto.EndDate,
 		CreatedAt:   edto.CreatedAt,
 		UpdatedAt:   edto.UpdatedAt,
 	}, nil
@@ -150,4 +145,13 @@ func convertDTOGendersToBmodel(jsonb pgtype.JSONB) (models.EventGender, error) {
 	}
 
 	return genders, nil
+}
+
+func convertDTOGenderToBmodel(g int) models.GenderType {
+	switch g {
+	case 0:
+		return models.Woman
+	default:
+		return models.Man
+	}
 }

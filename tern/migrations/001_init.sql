@@ -25,7 +25,7 @@ CREATE TABLE events(
     id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     author_id UUID NOT NULL,
     title TEXT NOT NULL,
-    type event_type NOT NULL,
+    type INT NOT NULL,
     theme TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     genders JSONB NOT NULL,
