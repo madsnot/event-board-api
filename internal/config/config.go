@@ -16,6 +16,7 @@ type Config struct {
 	TokenCfg         TokenConfig
 	HashCfg          HashConfig
 	OpensearchConfig OpensearchConfig
+	RabbitConfig     RabbitConfig
 }
 
 type MigrationsConfig struct {
@@ -45,6 +46,12 @@ type OpensearchConfig struct {
 	Username string `env:"OPENSEARCH_USERNAME" envDefault:"admin"`
 	Password string `env:"OPENSEARCH_PASSWORD" envDefault:"admin"`
 	Index    string `env:"OPENSEARCH_INDEX" envDefault:"event-index"`
+}
+
+type RabbitConfig struct {
+	Host         string `env:"RABBIT_HOST"`
+	Queue        string `env:"RABBIT_CREATE_QUEUE"`
+	ExchangeName string `env:"RABBIT_EXCHANGE_NAME"`
 }
 
 func LoadConfig() (Config, error) {

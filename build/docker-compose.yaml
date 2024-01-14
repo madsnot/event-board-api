@@ -38,6 +38,7 @@ services:
       - ./rabbitmq:/var/lib/rabbitmq
     ports:
       - 15672:15672
+      - 5672:5672
   opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1

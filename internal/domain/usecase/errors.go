@@ -50,7 +50,7 @@ func (be BusinessError) Wrap(err error) error {
 
 			msgs = append(msgs, msg)
 		}
-		
+
 	}
 
 	return models.NewWrapError(codes, msgs)
@@ -65,4 +65,5 @@ var (
 	ErrInvalidToGetEvents   = newBusinessError(1005, "invalid to get events")
 	ErrInvalidToCreateEvent = newBusinessError(1006, "invalid to create event")
 	ErrInvalidToCreateIndex = newBusinessError(1007, "invalid to create index")
+	ErrInvalidToPublishMsg  = newBusinessError(1008, "invalid to publish msg")
 )

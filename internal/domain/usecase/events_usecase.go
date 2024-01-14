@@ -2,20 +2,24 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"github.com/madsnot/event-board-api/internal/domain/models"
 	"github.com/madsnot/event-board-api/internal/repository/opensearch"
 	"github.com/madsnot/event-board-api/internal/repository/postgres"
+	"github.com/madsnot/event-board-api/internal/repository/rabbit"
 )
 
 type EventUsecase struct {
 	rep postgres.EventRepository
 	os  opensearch.Client
+	r   rabbit.Client
 }
 
-func NewEventUsecase(rep postgres.EventRepository, os opensearch.Client) *EventUsecase {
+func NewEventUsecase(rep postgres.EventRepository, os opensearch.Client, r rabbit.Client) *EventUsecase {
 	return &EventUsecase{
 		rep: rep,
 		os:  os,
+		r:   r,
 	}
 }
 
@@ -49,6 +53,14 @@ func (eu EventUsecase) CreateEvent(ctx context.Context, event models.Event) erro
 
 	if err = eu.os.Index(ctx, event); err != nil {
 		return ErrInvalidToCreateIndex.Wrap(err)
+	}
+
+	body := []byte(fmt.Sprintf("New event %s was created!", event.Title))
+
+	msg := eu.r.CreateMsg(body)
+
+	if err = eu.r.Publish(ctx, rabbit.CreateRoutingKey, msg); err != nil {
+		return ErrInvalidToPublishMsg.Wrap(err)
 	}
 
 	return nil

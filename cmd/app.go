@@ -9,12 +9,14 @@ import (
 	"github.com/madsnot/event-board-api/internal/domain/usecase"
 	osRep "github.com/madsnot/event-board-api/internal/repository/opensearch"
 	"github.com/madsnot/event-board-api/internal/repository/postgres"
+	"github.com/madsnot/event-board-api/internal/repository/rabbit"
 	httpServer "github.com/madsnot/event-board-api/internal/transport/http/v1"
 	"github.com/madsnot/event-board-api/pkg/database"
 	"github.com/madsnot/event-board-api/pkg/hash"
 	"github.com/madsnot/event-board-api/pkg/token"
 	"github.com/madsnot/event-board-api/tern"
 	"github.com/opensearch-project/opensearch-go/v2"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/rs/zerolog"
 	"net"
 	"net/http"
@@ -93,7 +95,7 @@ func (srv *Server) Run(ctx context.Context) error {
 		return err
 	}
 
-	err = srv.initRouters()
+	err = srv.initRouters(ctx)
 	if err != nil {
 		srv.logger.Error().Err(err).Msg("failed init routers")
 		return err
@@ -132,8 +134,8 @@ func (srv *Server) Close() {
 	}
 }
 
-func (srv *Server) initRouters() error {
-	client, err := opensearch.NewClient(opensearch.Config{
+func (srv *Server) initRouters(ctx context.Context) error {
+	clientOs, err := opensearch.NewClient(opensearch.Config{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
@@ -147,14 +149,34 @@ func (srv *Server) initRouters() error {
 		return err
 	}
 
+	osClient := osRep.NewOpensearchClient(srv.cfg.OpensearchConfig, clientOs)
+
+	conn, err := amqp.Dial(srv.cfg.RabbitConfig.Host)
+	if err != nil {
+		return err
+	}
+
+	channel, err := conn.Channel()
+	if err != nil {
+		return err
+	}
+
+	rabbitClient := rabbit.NewClient(conn, channel, srv.cfg.RabbitConfig.Queue, srv.cfg.RabbitConfig.ExchangeName)
+
+	consumer, err := rabbitClient.CreateConsumer(srv.cfg.RabbitConfig.Queue, srv.logger)
+	if err != nil {
+		return err
+	}
+
+	go consumer.SendNotificationToClient(ctx)
+
 	sessionRep := postgres.NewSessionRepository(srv.db, srv.logger)
 	userRep := postgres.NewUserRepository(srv.db, srv.logger)
 	eventRep := postgres.NewEventRepository(srv.db, srv.logger)
-	osClient := osRep.NewOpensearchClient(srv.cfg.OpensearchConfig, client)
 
 	authUC := usecase.NewAuthUsecase(srv.hasher, srv.tokenizer, userRep, sessionRep)
 	userUC := usecase.NewUserUsecase(userRep)
-	eventUC := usecase.NewEventUsecase(eventRep, osClient)
+	eventUC := usecase.NewEventUsecase(eventRep, osClient, rabbitClient)
 
 	uc := usecase.NewUsecase(authUC, userUC, eventUC)
 
