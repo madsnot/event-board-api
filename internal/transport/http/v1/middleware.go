@@ -31,7 +31,7 @@ func AuthMiddleware(next http.HandlerFunc, tokenizer *jwt.Tokenizer) http.Handle
 		}
 
 		if claims.IsValidAt(time.Now().UTC()) {
-			writeError(w, ErrJWTExpired)
+			//writeError(w, ErrJWTExpired)
 		}
 
 		next(w, r)

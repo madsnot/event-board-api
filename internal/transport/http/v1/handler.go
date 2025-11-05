@@ -33,7 +33,7 @@ func (h *handler) Register(router *mux.Router) {
 	router.HandleFunc("/auth/refresh", AuthMiddleware(h.RefreshToken, h.tokenizer)).Methods(http.MethodGet)
 	router.HandleFunc("/auth/logout", AuthMiddleware(h.Logout, h.tokenizer)).Methods(http.MethodGet)
 
-	router.HandleFunc("/api/events", AuthMiddleware(h.GetEventList, h.tokenizer)).Methods(http.MethodGet)
+	router.HandleFunc("/api/events", h.GetEventList).Methods(http.MethodGet)
 	router.HandleFunc("/api/events/create", h.CreateEvent).Methods(http.MethodPost)
 	router.HandleFunc("/api/events/id", AuthMiddleware(h.GetEvent, h.tokenizer)).Methods(http.MethodGet)
 	router.HandleFunc("/api/events/id/update", AuthMiddleware(h.UpdateEvent, h.tokenizer)).Methods(http.MethodPost)

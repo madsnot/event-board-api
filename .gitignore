@@ -7,6 +7,7 @@
 #db data
 build/data
 build/rabbitmq
+build/opensearch
 
 # Binaries for programs and plugins
 *.exe

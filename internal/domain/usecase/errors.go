@@ -20,6 +20,10 @@ func newBusinessError(code int, msg string) BusinessError {
 }
 
 func (be BusinessError) Error() string {
+	return fmt.Sprintf("%d", be.code)
+}
+
+func (be BusinessError) String() string {
 	return fmt.Sprintf("%d: %s", be.code, be.msg)
 }
 
@@ -56,14 +60,26 @@ func (be BusinessError) Wrap(err error) error {
 	return models.NewWrapError(codes, msgs)
 }
 
+const (
+	ErrInternalCode             = 1000
+	ErrUserNotFoundCode         = 1001
+	ErrInvalidEventCode         = 1002
+	ErrInvalidStartDateCode     = 1003
+	ErrDocsNotFoundCode         = 1004
+	ErrInvalidToGetEventsCode   = 1005
+	ErrInvalidToCreateEventCode = 1006
+	ErrInvalidToCreateIndexCode = 1007
+	ErrInvalidToPublishMsgCode  = 1008
+)
+
 var (
-	ErrInternal             = newBusinessError(1000, "internal business error")
-	ErrUserNotFound         = newBusinessError(1001, "user not found")
-	ErrInvalidEvent         = newBusinessError(1002, "invalid event")
-	ErrInvalidStartDate     = newBusinessError(1003, "invalid start date")
-	ErrDocsNotFound         = newBusinessError(1004, "docs not found")
-	ErrInvalidToGetEvents   = newBusinessError(1005, "invalid to get events")
-	ErrInvalidToCreateEvent = newBusinessError(1006, "invalid to create event")
-	ErrInvalidToCreateIndex = newBusinessError(1007, "invalid to create index")
-	ErrInvalidToPublishMsg  = newBusinessError(1008, "invalid to publish msg")
+	ErrInternal             = newBusinessError(ErrInternalCode, "internal business error")
+	ErrUserNotFound         = newBusinessError(ErrUserNotFoundCode, "user not found")
+	ErrInvalidEvent         = newBusinessError(ErrInvalidEventCode, "invalid event")
+	ErrInvalidStartDate     = newBusinessError(ErrInvalidStartDateCode, "invalid start date")
+	ErrDocsNotFound         = newBusinessError(ErrDocsNotFoundCode, "docs not found")
+	ErrInvalidToGetEvents   = newBusinessError(ErrInvalidToGetEventsCode, "invalid to get events")
+	ErrInvalidToCreateEvent = newBusinessError(ErrInvalidToCreateEventCode, "invalid to create event")
+	ErrInvalidToCreateIndex = newBusinessError(ErrInvalidToCreateIndexCode, "invalid to create index")
+	ErrInvalidToPublishMsg  = newBusinessError(ErrInvalidToPublishMsgCode, "invalid to publish msg")
 )

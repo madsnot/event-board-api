@@ -174,6 +174,10 @@ func (srv *Server) initRouters(ctx context.Context) error {
 	userRep := postgres.NewUserRepository(srv.db, srv.logger)
 	eventRep := postgres.NewEventRepository(srv.db, srv.logger)
 
+	if err = osClient.InitIndex(ctx, eventRep); err != nil {
+		return err
+	}
+
 	authUC := usecase.NewAuthUsecase(srv.hasher, srv.tokenizer, userRep, sessionRep)
 	userUC := usecase.NewUserUsecase(userRep)
 	eventUC := usecase.NewEventUsecase(eventRep, osClient, rabbitClient)

@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/madsnot/event-board-api/internal/domain/models"
 	"github.com/madsnot/event-board-api/internal/repository/opensearch"
 	"github.com/madsnot/event-board-api/internal/repository/postgres"
 	"github.com/madsnot/event-board-api/internal/repository/rabbit"
@@ -26,7 +25,7 @@ func NewEventUsecase(rep postgres.EventRepository, os opensearch.Client, r rabbi
 func (eu EventUsecase) GetList(ctx context.Context, filters models.EventFilters) ([]models.Event, error) {
 	var err error
 
-	filters.EventIDs, err = eu.os.Search(ctx, filters.Query)
+	filters.EventIDs, err = eu.os.Search(ctx, filters.Query, 0, 100)
 	if err != nil {
 		return nil, ErrDocsNotFound.Wrap(err)
 	}

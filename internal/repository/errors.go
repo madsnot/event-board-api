@@ -18,6 +18,10 @@ func newIntegrationError(code int, msg string) IntegrationError {
 }
 
 func (ie IntegrationError) Error() string {
+	return fmt.Sprintf("%d", ie.code)
+}
+
+func (ie IntegrationError) String() string {
 	return fmt.Sprintf("%d: %s", ie.code, ie.msg)
 }
 

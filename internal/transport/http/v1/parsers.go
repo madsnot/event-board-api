@@ -2,10 +2,9 @@ package v1
 
 import (
 	"encoding/json"
-	"net/http"
-	"strconv"
-
 	"github.com/madsnot/event-board-api/internal/transport/http/dto"
+	"io"
+	"net/http"
 )
 
 func parseRequestToSignInRequestDTO(r *http.Request) (dto.SignInRequest, error) {
@@ -39,111 +38,34 @@ func parseSignInResponseToResponse(r *http.Request) (dto.SignInRequest, error) {
 }
 
 func parseRequestToGetEventsRequest(r *http.Request) (dto.GetEventsRequest, error) {
-	if err := r.ParseMultipartForm(8192); err != nil {
-		return dto.GetEventsRequest{}, err
-	}
+	var (
+		req  dto.GetEventsRequest
+		body []byte
+	)
 
-	var statuses []int
-
-	err := json.Unmarshal([]byte(r.PostForm.Get("statuses")), &statuses)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return dto.GetEventsRequest{}, err
 	}
 
-	var ids, themes []string
-
-	err = json.Unmarshal([]byte(r.PostForm.Get("authorIds")), &ids)
-	if err != nil {
+	if err := json.Unmarshal(body, &req); err != nil {
 		return dto.GetEventsRequest{}, err
 	}
 
-	err = json.Unmarshal([]byte(r.PostForm.Get("themes")), &themes)
-	if err != nil {
-		return dto.GetEventsRequest{}, err
-	}
-
-	etype, err := strconv.Atoi(r.PostForm.Get("type"))
-	if err != nil {
-		return dto.GetEventsRequest{}, err
-	}
-
-	age, err := strconv.Atoi(r.PostForm.Get("age"))
-	if err != nil {
-		return dto.GetEventsRequest{}, err
-	}
-
-	var genders dto.EventGenderDTO
-
-	data := []byte(r.PostForm.Get("genders"))
-
-	if err = json.Unmarshal(data, &genders); err != nil {
-		return dto.GetEventsRequest{}, err
-	}
-
-	older, err := strconv.ParseBool(r.PostForm.Get("older"))
-	if err != nil {
-		return dto.GetEventsRequest{}, err
-	}
-
-	younger, err := strconv.ParseBool(r.PostForm.Get("younger"))
-	if err != nil {
-		return dto.GetEventsRequest{}, err
-	}
-
-	return dto.GetEventsRequest{
-		Query:     r.PostForm.Get("query"),
-		Statuses:  statuses,
-		AuthorIDs: ids,
-		Type:      etype,
-		Themes:    themes,
-		Genders:   genders,
-		Age:       age,
-		Older:     older,
-		Younger:   younger,
-		StartDate: r.PostForm.Get("startDate"),
-		EndDate:   r.PostForm.Get("endDate"),
-		CreateAt:  r.PostForm.Get("createAt"),
-	}, nil
+	return req, nil
 }
 
 func parseRequestToCreateEventRequest(r *http.Request) (dto.CreateEventRequest, error) {
-	if err := r.ParseMultipartForm(8192); err != nil {
-		return dto.CreateEventRequest{}, err
-	}
+	var req dto.CreateEventRequest
 
-	status, err := strconv.Atoi(r.PostForm.Get("status"))
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return dto.CreateEventRequest{}, err
 	}
 
-	etype, err := strconv.Atoi(r.PostForm.Get("type"))
-	if err != nil {
+	if err := json.Unmarshal(body, &req); err != nil {
 		return dto.CreateEventRequest{}, err
 	}
 
-	age, err := strconv.Atoi(r.PostForm.Get("age"))
-	if err != nil {
-		return dto.CreateEventRequest{}, err
-	}
-
-	var genders dto.EventGenderDTO
-
-	data := []byte(r.PostForm.Get("genders"))
-
-	if err = json.Unmarshal(data, &genders); err != nil {
-		return dto.CreateEventRequest{}, err
-	}
-
-	return dto.CreateEventRequest{
-		Status:      status,
-		AuthorID:    r.PostForm.Get("authorId"),
-		Title:       r.PostForm.Get("title"),
-		Type:        etype,
-		Theme:       r.PostForm.Get("theme"),
-		Description: r.PostForm.Get("description"),
-		Genders:     genders,
-		Age:         age,
-		StartDate:   r.PostForm.Get("startDate"),
-		EndDate:     r.PostForm.Get("endDate"),
-	}, nil
+	return req, nil
 }
