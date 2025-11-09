@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/madsnot/event-board-api/internal/config"
 	"os"
 	"strconv"
 	"time"
@@ -15,24 +14,20 @@ import (
 
 const timeFormat = "2006-01-02 15:04:05"
 
-func RunMigrations(ctx context.Context, cfg config.Config) error {
-	connConfig, err := pgx.ParseConfig(cfg.PostgresCfg.DSN)
+func RunMigrations(ctx context.Context, pgDSN, migrationsPath, tableVersion, destination string) error {
+	conn, err := newPgConn(ctx, pgDSN)
 	if err != nil {
 		return err
 	}
 
-	conn, err := pgx.ConnectConfig(ctx, connConfig)
-	if err != nil {
-		return err
-	}
 	defer conn.Close(ctx)
 
-	migrator, err := migrate.NewMigrator(ctx, conn, cfg.MigrationsCfg.VersionTable)
+	migrator, err := migrate.NewMigrator(ctx, conn, tableVersion)
 	if err != nil {
 		return err
 	}
 
-	if err := migrator.LoadMigrations(os.DirFS(cfg.MigrationsCfg.Path)); err != nil {
+	if err := migrator.LoadMigrations(os.DirFS(migrationsPath)); err != nil {
 		return err
 	}
 
@@ -50,7 +45,6 @@ func RunMigrations(ctx context.Context, cfg config.Config) error {
 		return err
 	}
 
-	destination := cfg.MigrationsCfg.DestinationVersion
 	mustParseDestination := func(d string) int32 {
 		var n int64
 
@@ -81,4 +75,18 @@ func RunMigrations(ctx context.Context, cfg config.Config) error {
 	}
 
 	return err
+}
+
+func newPgConn(ctx context.Context, dsn string) (*pgx.Conn, error) {
+	connConfig, err := pgx.ParseConfig(dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := pgx.ConnectConfig(ctx, connConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
 }

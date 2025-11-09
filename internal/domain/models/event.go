@@ -1,30 +1,62 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type (
-	EventType   int
-	EventGender struct {
-		Man   bool
-		Woman bool
-	}
-	EventStatus int
-)
+type EventType int
 
 const (
-	EventTypeEmpty EventType = iota
+	EventTypeUnknown EventType = iota
+	EventTypeEmpty
 	EventTypeOnline
 	EventTypeOffline
 )
 
+type EventGender int
+
 const (
-	EventStatusEmpty EventStatus = iota
+	EventGenderUnknown EventGender = iota
+	EventGenderWoman
+	EventGenderMan
+)
+
+type EventStatus int
+
+const (
+	EventStatusUnknown EventStatus = iota
+	EventStatusEmpty
 	EventStatusNew
 	EventStatusActive
+	EventStatusCancled
 	EventStatusClosed
+)
+
+type EventTheme int
+
+const (
+	EventThemeUnknown EventTheme = iota
+	EventThemeSport
+	EventThemePCGames
+	EventThemeTableGames
+	EventThemeArt
+	EventThemeTV
+	EventThemeCulture
+	EventThemeHoliday
+	EventThemeOther
+)
+
+type EventAge int
+
+const (
+	EventAgeUnknown EventAge = iota
+	EventAgeSix
+	EventAgeTwelve
+	EventAgeSixteen
+	EventAgeEighteen
+	EventAgeTwentyOne
 )
 
 type Event struct {
@@ -33,12 +65,12 @@ type Event struct {
 	AuthorID    uuid.UUID
 	Title       string
 	Type        EventType
-	Theme       string
+	Theme       EventTheme
 	Description string
-	Genders     EventGender
-	Age         int
+	Genders     []EventGender
+	Age         EventAge
 	StartDate   time.Time
-	EndDate     *time.Time
+	EndDate     time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
