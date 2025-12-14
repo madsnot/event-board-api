@@ -12,22 +12,38 @@ import (
 	"github.com/jackc/tern/v2/migrate"
 )
 
-const timeFormat = "2006-01-02 15:04:05"
+type RunningConfig struct {
+	DSN            string
+	TimeFormat     string
+	MigrationsPath string
+	TableVersion   string
+	Destination    string
+}
 
-func RunMigrations(ctx context.Context, pgDSN, migrationsPath, tableVersion, destination string) error {
-	conn, err := newPgConn(ctx, pgDSN)
+func NewRunningConfig(DSN, migrationsPath, tableVersion, destination string) RunningConfig {
+	return RunningConfig{
+		DSN:            DSN,
+		MigrationsPath: migrationsPath,
+		TableVersion:   tableVersion,
+		Destination:    destination,
+		TimeFormat:     "2006-01-02 15:04:05",
+	}
+}
+
+func (rc RunningConfig) RunMigrations(ctx context.Context) error {
+	conn, err := newPgConn(ctx, rc.DSN)
 	if err != nil {
 		return err
 	}
 
 	defer conn.Close(ctx)
 
-	migrator, err := migrate.NewMigrator(ctx, conn, tableVersion)
+	migrator, err := migrate.NewMigrator(ctx, conn, rc.TableVersion)
 	if err != nil {
 		return err
 	}
 
-	if err := migrator.LoadMigrations(os.DirFS(migrationsPath)); err != nil {
+	if err := migrator.LoadMigrations(os.DirFS(rc.MigrationsPath)); err != nil {
 		return err
 	}
 
@@ -36,7 +52,7 @@ func RunMigrations(ctx context.Context, pgDSN, migrationsPath, tableVersion, des
 	}
 
 	migrator.OnStart = func(sequence int32, startAt, name, sql string) {
-		startAt = time.Now().Format(timeFormat)
+		startAt = time.Now().Format(rc.TimeFormat)
 		fmt.Printf("%s %s sql: %s\n", startAt, name, sql)
 	}
 
@@ -59,26 +75,26 @@ func RunMigrations(ctx context.Context, pgDSN, migrationsPath, tableVersion, des
 	}
 
 	switch {
-	case destination == "last":
+	case rc.Destination == "last":
 		err = migrator.Migrate(ctx)
-	case len(destination) >= 3 && destination[0:2] == "-+":
-		err = migrator.MigrateTo(ctx, currentVersion-mustParseDestination(destination[2:]))
+	case len(rc.Destination) >= 3 && rc.Destination[0:2] == "-+":
+		err = migrator.MigrateTo(ctx, currentVersion-mustParseDestination(rc.Destination[2:]))
 		if err == nil {
 			err = migrator.MigrateTo(ctx, currentVersion)
 		}
-	case len(destination) >= 2 && destination[0] == '-':
-		err = migrator.MigrateTo(ctx, currentVersion-mustParseDestination(destination[1:]))
-	case len(destination) >= 2 && destination[0] == '+':
-		err = migrator.MigrateTo(ctx, currentVersion+mustParseDestination(destination[1:]))
+	case len(rc.Destination) >= 2 && rc.Destination[0] == '-':
+		err = migrator.MigrateTo(ctx, currentVersion-mustParseDestination(rc.Destination[1:]))
+	case len(rc.Destination) >= 2 && rc.Destination[0] == '+':
+		err = migrator.MigrateTo(ctx, currentVersion+mustParseDestination(rc.Destination[1:]))
 	default:
-		err = migrator.MigrateTo(ctx, mustParseDestination(destination))
+		err = migrator.MigrateTo(ctx, mustParseDestination(rc.Destination))
 	}
 
 	return err
 }
 
-func newPgConn(ctx context.Context, dsn string) (*pgx.Conn, error) {
-	connConfig, err := pgx.ParseConfig(dsn)
+func newPgConn(ctx context.Context, DSN string) (*pgx.Conn, error) {
+	connConfig, err := pgx.ParseConfig(DSN)
 	if err != nil {
 		return nil, err
 	}

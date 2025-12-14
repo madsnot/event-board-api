@@ -2,29 +2,33 @@ package usecase
 
 import (
 	"context"
+	"time"
+
 	"github.com/cristalhq/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/madsnot/event-board-api/internal/domain/models"
 	repo "github.com/madsnot/event-board-api/internal/repository/postgres"
 	"github.com/madsnot/event-board-api/pkg/hash"
 	"github.com/madsnot/event-board-api/pkg/token"
-	"time"
 )
+
+type AuthRepository struct {
+	repo.IUserRepository
+	repo.ISessionRepository
+}
 
 type AuthUsecase struct {
 	hasher     *hash.Hasher
 	tokenizer  *token.Tokenizer
-	userRep    repo.IUserRepository
-	sessionRep repo.ISessionRepository
+	repository AuthRepository
 }
 
 func NewAuthUsecase(hasher *hash.Hasher, tokenizer *token.Tokenizer,
-	userRepo repo.IUserRepository, sessionRepo repo.ISessionRepository) *AuthUsecase {
+	repository AuthRepository) *AuthUsecase {
 	return &AuthUsecase{
 		hasher:     hasher,
 		tokenizer:  tokenizer,
-		userRep:    userRepo,
-		sessionRep: sessionRepo,
+		repository: repository,
 	}
 }
 
@@ -38,7 +42,7 @@ func (ac AuthUsecase) CreateSession(ctx context.Context, userID uuid.UUID) (mode
 		return models.Session{}, err
 	}
 
-	session, err = ac.sessionRep.CreateSession(ctx, session)
+	session, err = ac.repository.CreateSession(ctx, session)
 	if err != nil {
 		return models.Session{}, err
 	}
