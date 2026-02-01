@@ -3,7 +3,9 @@ package v1
 import (
 	"encoding/json"
 	"errors"
+	"github.com/madsnot/event-board-api/internal/domain/models"
 	"github.com/madsnot/event-board-api/internal/domain/usecase"
+	"log"
 	"net/http"
 )
 
@@ -21,15 +23,22 @@ const (
 )
 
 func writeError(w http.ResponseWriter, err error) {
+	var (
+		wErr models.WrapError
+		bErr usecase.BusinessError
+	)
+
 	w.Header().Set(ContentTypeHeader, ApplicationJSONType)
 
 	switch {
-	case errors.Is(err, usecase.ErrInvalidStartDate) || errors.Is(err, usecase.ErrInvalidEvent):
-		w.WriteHeader(http.StatusBadRequest)
-		err = ErrBadRequest.Wrap(err)
+	case errors.Is(err, wErr):
+		log.Println(wErr)
+
+		errors.As(err, &bErr)
+
+		w.WriteHeader(CODES[bErr.Code()])
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
-		err = ErrInternal.Wrap(err)
 	}
 
 	respBody, err := json.Marshal(err.Error())

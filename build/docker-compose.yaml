@@ -58,6 +58,7 @@ services:
         hard: 65536
     volumes:
       - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+      - ./opensearch/libs/hunspell:/usr/share/opensearch/config/hunspell
     ports:
       - 9200:9200 # REST API
       - 9600:9600 # Performance Analyzer
@@ -82,6 +83,7 @@ services:
         hard: 65536
     volumes:
       - opensearch-data2:/usr/share/opensearch/data
+      - ./opensearch/libs/hunspell:/usr/share/opensearch/config/hunspell
     networks:
       - opensearch-net
   opensearch-dashboards:

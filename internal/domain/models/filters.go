@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type EventFilters struct {
@@ -10,12 +11,10 @@ type EventFilters struct {
 	EventIDs  []uuid.UUID
 	Statuses  []EventStatus
 	AuthorIDs []uuid.UUID
-	Type      EventType
-	Themes    []string
-	Genders   EventGender
-	Age       int
-	Older     bool
-	Younger   bool
+	Types     []EventType
+	Themes    []EventTheme
+	Genders   []EventGender
+	Age       []EventAge
 	StartDate *time.Time
 	EndDate   *time.Time
 	CreatedAt *time.Time

@@ -1,15 +1,17 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type GenderType int
+type UserGenderType int
 
 const (
-	Woman GenderType = iota
-	Man
+	UserGenderTypeUnknown UserGenderType = iota
+	UserGenderTypeWoman
+	UserGenderTypeMan
 )
 
 type User struct {
@@ -21,7 +23,7 @@ type User struct {
 	Firstname    string
 	Lastname     string
 	Middlename   string
-	Gender       GenderType
+	Gender       UserGenderType
 	BirthdayDate *time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

@@ -4,6 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"net"
+	"net/http"
+	"os"
+
 	"github.com/gorilla/mux"
 	"github.com/madsnot/event-board-api/internal/config"
 	"github.com/madsnot/event-board-api/internal/domain/usecase"
@@ -18,9 +22,6 @@ import (
 	"github.com/opensearch-project/opensearch-go/v2"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/rs/zerolog"
-	"net"
-	"net/http"
-	"os"
 )
 
 type Server struct {
@@ -73,7 +74,8 @@ func (srv *Server) Run(ctx context.Context) error {
 	var err error
 
 	if srv.cfg.MigrationsCfg.AutoRun {
-		err = tern.RunMigrations(ctx, srv.cfg)
+		migrCfg := tern.NewRunningConfig(srv.cfg.)
+		err = RunMigrations(ctx, srv.cfg)
 		if err != nil {
 			srv.logger.Error().Err(err).Msg("failed to run migrations")
 			return err
@@ -173,6 +175,10 @@ func (srv *Server) initRouters(ctx context.Context) error {
 	sessionRep := postgres.NewSessionRepository(srv.db, srv.logger)
 	userRep := postgres.NewUserRepository(srv.db, srv.logger)
 	eventRep := postgres.NewEventRepository(srv.db, srv.logger)
+
+	if err = osClient.InitIndex(ctx, eventRep); err != nil {
+		return err
+	}
 
 	authUC := usecase.NewAuthUsecase(srv.hasher, srv.tokenizer, userRep, sessionRep)
 	userUC := usecase.NewUserUsecase(userRep)
